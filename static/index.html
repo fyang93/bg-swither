@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Transition</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+    <div id="image-container">
+        <img src="images/default.jpg" class="image current">
+        <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/images')
+                .then(response => {
+                    console.log('Response received:', response);
+                    return response.json();
+                })
+                .then(images => {
+                    console.log('Images received:', images);
+                    images.forEach(src => {
+                        const img = new Image();
+                        img.src = src;
+                        console.log(`loading ${src}`);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading images:', error);
+                });
+        });
+    </script>
+    <script>
+        const socket = io();
+        socket.on('api_transition', function(name, effect, duration) {
+            transition(name, effect, duration);
+        });
+
+        function transition(name, effect, duration) {
+            const currentImage = document.querySelector('.current');
+            const nextImage = document.createElement('img');
+            nextImage.src = `images/${name}`;
+            nextImage.classList.add('image', 'next');
+            document.getElementById('image-container').appendChild(nextImage);
+
+            currentImage.style.transition = `opacity ${duration}s ease-in-out, transform ${duration}s ease-in-out`;
+            nextImage.style.transition = `opacity ${duration}s ease-in-out, transform ${duration}s ease-in-out`;
+
+            switch (effect) {
+                case "fade":
+                    currentImage.style.opacity = 0;
+                    nextImage.style.opacity = 1;
+                    break;
+
+                case "scale":
+                    currentImage.style.transform = 'scale(1.2)';
+                    currentImage.style.opacity = 0;
+                    nextImage.style.transform = 'scale(0.8)';
+                    nextImage.style.opacity = 1;
+                    setTimeout(() => {
+                        nextImage.style.transform = 'scale(1)';
+                    }, 50);
+                    break;
+
+                case "slide":
+                case "slide-down":
+                    nextImage.style.transform = 'translateY(-100%)';
+                    setTimeout(() => {
+                        currentImage.style.transform = 'translateY(100%)';
+                        nextImage.style.transform = 'translateY(0)';
+                    }, 50);
+                    break;
+
+                case "slide-up":
+                    nextImage.style.transform = 'translateY(100%)';
+                    setTimeout(() => {
+                        currentImage.style.transform = 'translateY(-100%)';
+                        nextImage.style.transform = 'translateY(0)';
+                    }, 50);
+                    break;
+
+                case "slide-left":
+                    nextImage.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        currentImage.style.transform = 'translateX(-100%)';
+                        nextImage.style.transform = 'translateX(0)';
+                    }, 50);
+                    break;
+
+                case "slide-right":
+                    nextImage.style.transform = 'translateX(-100%)';
+                    setTimeout(() => {
+                        currentImage.style.transform = 'translateX(100%)';
+                        nextImage.style.transform = 'translateX(0)';
+                    }, 50);
+                    break;
+
+                case "expand":
+                case "expand-down":
+                    currentImage.style.transform = 'scaleY(1)';
+                    nextImage.style.transform = 'scaleY(0)';
+                    nextImage.style.transformOrigin = 'top';
+                    setTimeout(() => {
+                        currentImage.style.transform = 'scaleY(0)';
+                        currentImage.style.transformOrigin = 'bottom';
+                        nextImage.style.transform = 'scaleY(1)';
+                    }, 50);
+                    break;
+
+                case "expand-up":
+                    currentImage.style.transform = 'scaleY(1)';
+                    nextImage.style.transform = 'scaleY(0)';
+                    nextImage.style.transformOrigin = 'bottom';
+                    setTimeout(() => {
+                        currentImage.style.transform = 'scaleY(0)';
+                        currentImage.style.transformOrigin = 'top';
+                        nextImage.style.transform = 'scaleY(1)';
+                    }, 50);
+                    break;
+
+                case "expand-left":
+                    currentImage.style.transform = 'scaleX(1)';
+                    nextImage.style.transform = 'scaleX(0)';
+                    nextImage.style.transformOrigin = 'right';
+                    setTimeout(() => {
+                        currentImage.style.transform = 'scaleX(0)';
+                        currentImage.style.transformOrigin = 'left';
+                        nextImage.style.transform = 'scaleX(1)';
+                    }, 50);
+                    break;
+
+                case "expand-right":
+                    currentImage.style.transform = 'scaleX(1)';
+                    nextImage.style.transform = 'scaleX(0)';
+                    nextImage.style.transformOrigin = 'left';
+                    setTimeout(() => {
+                        currentImage.style.transform = 'scaleX(0)';
+                        currentImage.style.transformOrigin = 'right';
+                        nextImage.style.transform = 'scaleX(1)';
+                    }, 50);
+                    break;
+
+                default:
+                    break;
+            }
+
+            setTimeout(() => {
+                currentImage.remove();
+                nextImage.classList.remove('next');
+                nextImage.classList.add('current');
+            }, duration * 1000);
+
+            console.log('image transition succeed.')
+        }
+    </script>
+</body>
+</html>

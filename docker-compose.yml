@@ -1,0 +1,7 @@
+services:
+  app:
+    build: .
+    volumes:
+      - ./static/images:/app/static/images:ro
+    ports:
+      - "50009:5000"
