@@ -16,7 +16,8 @@ effects = [
 def get_image_filenames():
     image_dir = "static/images"
     try:
-        return [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
+        return [f for f in os.listdir(image_dir)
+                if f != ".gitignore" and os.path.isfile(os.path.join(image_dir, f))]
     except FileNotFoundError:
         return []
 
